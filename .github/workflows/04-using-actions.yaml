@@ -1,6 +1,6 @@
 name: Using Actions
 on:
-  push:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,6 +19,3 @@ jobs:
 
       - name: Build React App
         run: npm run build
-    # 0. Checkout the code from the repository
-    # 1. Install dependencies of our React application
-    # 2. Execute automated tasks
