@@ -1,0 +1,14 @@
+name: Using Actions
+on:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+      - name: Printing the folders and files
+        run: ls -a
+    # 0. Checkout the code from the repository
+    # 1. Install dependencies of our React application
+    # 2. Execute automated tasks
