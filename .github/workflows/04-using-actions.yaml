@@ -19,7 +19,7 @@ jobs:
         working-directory: 04-using-actions/react-app
 
     steps:
-      - name: Checkout code
+      - name: 🧾 Checkout code
         uses: actions/checkout@v5.0.0
 
       - name: 🛠️ Setup Node.js
@@ -27,23 +27,17 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm i
 
-      - name: Lint code
+      - name: 🔍 Lint code
         run: npm run lint
 
-      - name: Run tests
+      - name: 🧪 Run tests
         run: npm test
 
-      - name: Build React app
+      - name: 🏗️ Build React app
         run: npm run build
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: react-build
-          path: 04-using-actions/react-app/build
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -62,16 +56,10 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: react-build
-          path: 04-using-actions/react-app/build
-
-      - name: Extract major version from tag
+      - name: 🧠 Extract major version from tag
         id: version
         run: |
           TAG_NAME="${GITHUB_REF#refs/tags/v}"
