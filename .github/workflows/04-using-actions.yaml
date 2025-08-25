@@ -1,21 +1,88 @@
-name: 04 - Using Actions
+name: CI & Conditional Publish Using Actions
+
 on:
+  push:
+    branches:
+      - main
+      - "release/**"
+      - "feature/**"
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
+
 jobs:
   build:
+    if: startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: 04-using-actions/react-app
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v5.0.0
-      - name: Setup Node.js environment
+
+      - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v4.4.0
         with:
           node-version: "22.x"
-      - name: Install Dependencies
+
+      - name: Install dependencies
         run: npm i
 
-      - name: Build React App
+      - name: Lint code
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build React app
         run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-build
+          path: 04-using-actions/react-app/build
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 04-using-actions/react-app
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v5.0.0
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: 04-using-actions/react-app/build
+
+      - name: Extract major version from tag
+        id: version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/v}"
+          MAJOR_VERSION="${TAG_NAME%%.*}"
+          echo "Detected tag: $TAG_NAME"
+          echo "major=$MAJOR_VERSION" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Dry-run publish as latest
+        if: steps.version.outputs.major == '1'
+        run: npm publish --tag latest --dry-run
+
+      - name: 🚀 Dry-run publish as next
+        if: steps.version.outputs.major == '2'
+        run: npm publish --tag next --dry-run
